@@ -1,93 +1,181 @@
 # Media Delivery — WebReader, WebPlayer & Community
 
-Status: **Target architecture / phased rollout**
+Status: **Decision fixed — V1 rollout**
 
-## Immediate objective
+## 1. Decision
 
-Launch digital learning without waiting for a full LMS, while avoiding permanent dependence on Telegram or public Drive links.
+Novidades launches with a provider-neutral WebPlayer immediately.
 
-## Phase A — immediate bridge
+For V1, video sources are:
 
-Use Telegram where operationally useful for:
-- community;
-- cohort discussion;
-- bonus delivery;
-- temporary gated course access when rights permit.
+1. **Sales-page videos and public samples/previews** — embedded directly in Novidades pages.
+2. **Premium lessons/videos** — either:
+   - protected files hosted on Atlas VPS; or
+   - Telegram delivery/community when that is the fastest operational route.
+3. **Later providers already anticipated, but not blockers**:
+   - YouTube (typically unlisted/public preview use);
+   - Cloudflare Stream.
 
-Flow:
+The application must not hard-code one provider as the content identity.
+
+## 2. WebPlayer V1
+
+The WebPlayer is a Novidades application surface, independent of media origin.
+
+Target route:
 
 ```text
-ARO entitlement ACTIVE
-  → user links Telegram identity
-  → bot creates/uses controlled join-request flow
-  → eligible user is admitted
+/assistir/[content]/[lesson]
 ```
 
-Telegram is not the canonical catalog, rights registry or entitlement authority.
+UX supports:
+- embedded sales video;
+- public trailer/sample;
+- first lesson preview;
+- protected premium lesson;
+- module/lesson navigation;
+- lesson metadata;
+- downloads/materials;
+- later progress tracking.
 
-## Phase B — native WebPlayer
+## 3. Supported V1 providers
 
-Use **Cloudflare Stream** for protected video:
+### VPS
+
+Use for premium video when we want the lesson to play directly inside the Novidades page.
+
+Preferred baseline:
+- media behind a dedicated server/reverse-proxy route;
+- HTTP range requests enabled;
+- no permanent public premium asset URL exposed as the access authority;
+- server validates content access before issuing/serving a short-lived media path;
+- MP4 progressive playback is acceptable for V1;
+- HLS may be added later.
+
+VPS media is a delivery mechanism only. ARO remains entitlement authority.
+
+### Telegram
+
+Use for:
+- complete courses already organized in Telegram;
+- community;
+- cohort discussion;
+- bonus materials;
+- temporary premium delivery where migration is not yet worth the effort.
+
+Telegram is never the canonical catalog, rights registry or commerce authority.
+
+A course may be hybrid:
+
+```text
+Sales page / preview     → Novidades embedded video
+Selected premium lessons → WebPlayer + VPS
+Remaining course         → Telegram channel/group
+Community                → Telegram
+```
+
+## 4. Future providers
+
+### YouTube
+Plan support in the provider abstraction.
+
+Best use:
+- trailers;
+- sample lessons;
+- public/free video;
+- lower-sensitivity content.
+
+Unlisted links are operationally useful but are not treated as strong entitlement protection.
+
+### Cloudflare Stream
+Planned upgrade path for:
 - adaptive streaming;
-- Stream video IDs stored in `novidades.content_assets`;
-- signed-token playback for entitled users;
-- first/public lesson can use a public preview asset or explicitly public token policy.
+- signed playback;
+- larger video library;
+- reduced custom media operations.
 
-Suggested UX:
-- product page trailer/lesson 0;
-- course page with module list;
-- mini player cards;
-- full `/assistir/[slug]` learning player;
-- progress tracking;
-- continue watching.
+Cloudflare is not required for V1.
 
-## Phase C — object assets
+## 5. Provider-neutral asset model
 
-Use **Cloudflare R2** for:
-- PDFs;
-- ZIP packs;
-- workbooks;
-- audio;
-- subtitles/transcripts;
-- thumbnails/source derivatives where appropriate.
+`content_assets` should support:
 
-Access should be short-lived and server-authorized.
+- `provider`: vps | telegram | youtube | cloudflare_stream | drive | supabase | external
+- `provider_asset_id`
+- `asset_kind`: video | audio | pdf | zip | image | subtitle | transcript
+- `delivery_mode`: embedded | protected_stream | download | community
+- `preview_policy`
+- `duration`
+- `mime_type`
+- `release_id`
+- `lesson_id`
+- `active`
 
-## WebReader
+This permits provider migration without changing content identity.
 
-Preserve the existing reader UX concept, but change authorization:
-- old: checkout reference + claim + local entitlement;
-- target: authenticated account + ARO active entitlement.
+## 6. eBooks, PDFs and other digital assets
 
-Content can be stored as structured blocks/releases and rendered natively.
+### Current state
+Google Drive may continue to hold:
+- editorial masters;
+- source files;
+- current PDFs/assets during transition.
 
-## Google Drive
+Supabase may continue to serve:
+- structured content;
+- WebReader blocks;
+- metadata;
+- existing protected objects during migration.
 
-Use Drive for editorial/source collaboration if useful, not as the final customer streaming/delivery runtime.
+### V1 target
+Separate **source/master** from **customer delivery**.
 
-## Telegram admission design
+```text
+Google Drive
+  → editorial/master/source
 
-When implemented:
-1. customer authenticates in Novidades;
-2. server resolves ARO entitlement;
+Supabase/Postgres
+  → metadata / releases / Reader content / access projection
+
+Delivery
+  → current protected Supabase storage where suitable
+  → VPS when operationally useful
+  → future R2/other object storage when scale justifies
+```
+
+Do not make a public Google Drive link the permanent premium delivery mechanism.
+
+## 7. WebReader
+
+Preserve the existing WebReader experience.
+
+Authorization target:
+- authenticated customer;
+- ARO ACTIVE entitlement;
+- Novidades resolves the approved content release;
+- structured content is rendered natively.
+
+During migration, legacy claim-based access can be preserved only for historical purchasers until reconciliation is complete.
+
+## 8. Community admission
+
+Telegram community/course admission:
+
+1. customer authenticates or presents the approved identity bridge;
+2. Novidades resolves ARO entitlement;
 3. customer links Telegram identity;
-4. bot issues or validates a join request;
-5. bot approves only if entitlement is active;
-6. audit admission;
-7. refund/revocation triggers removal where the channel/bot permissions allow it.
+4. Telegram bot/admin workflow receives join request;
+5. admission only if entitlement is valid;
+6. admission is logged;
+7. refund/reversal can trigger removal according to channel policy.
 
-No Telegram bot token is exposed client-side.
+Telegram bot token remains server-side.
 
-## Media portability
+## 9. Non-goals for V1
 
-`content_assets` stores provider-neutral metadata:
-- `provider`;
-- `provider_asset_id`;
-- `asset_kind`;
-- `delivery_mode`;
-- `duration`;
-- `mime_type`;
-- `release_id`;
-- `preview_policy`.
-
-This lets us move between Stream/R2/other providers without changing content identity.
+- DRM.
+- bespoke transcoding farm.
+- full LMS.
+- mandatory Cloudflare Stream migration.
+- mandatory YouTube hosting.
+- replacing every Telegram course before launch.
