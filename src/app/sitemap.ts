@@ -7,18 +7,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes = [
     "",
+    "/conteudos-digitais",
+    "/cursos",
+    "/aulas",
+    "/webinars",
+    "/ebooks",
+    "/ferramentas",
     "/sobre",
     "/contato",
     "/ajuda",
-    "/conteudos-digitais",
-    "/site",
-    "/ferramentas",
-    "/ferramentas/hook-lab",
-    "/ferramentas/page-audit",
-    "/entregas",
-    "/pagamentos",
-    "/trocas-e-devolucoes",
-    "/cancelamentos",
     "/termos",
     "/privacidade",
     "/cookies",
@@ -30,21 +27,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: base + path,
     lastModified: new Date(),
     changeFrequency: path === "" ? "daily" : "monthly",
-    priority: path === "" ? 1 : path === "/conteudos-digitais" ? 0.85 : 0.35,
+    priority: path === "" ? 1 : ["/conteudos-digitais", "/cursos", "/aulas", "/webinars", "/ebooks"].includes(path) ? 0.85 : 0.35,
   }));
 
   const productEntries: MetadataRoute.Sitemap = catalog
-    .filter((item) => item.priceCents !== null)
+    .filter((item) => item.fulfillmentType === "digital" && item.priceCents !== null)
     .map((item) => ({
-      url:
-        base +
-        "/" +
-        encodeURIComponent(item.categorySlug) +
-        "/" +
-        encodeURIComponent(item.slug),
+      url: base + "/" + encodeURIComponent(item.categorySlug) + "/" + encodeURIComponent(item.slug),
       lastModified: new Date(),
       changeFrequency: "weekly",
-      priority: item.featured ? 0.9 : 0.7,
+      priority: item.featured ? 0.8 : 0.65,
     }));
 
   return [...staticEntries, ...productEntries];
