@@ -6,7 +6,7 @@ The dedicated workforce should be separate from AMF. AMF can still be commission
 
 ## Core team — 8 agents
 
-### 1. Nova — Product & Program Lead
+### 1. Diana — Product & Program Lead
 Mission:
 - orchestrate Novidades/GWD execution;
 - maintain priorities, gates and dependencies;
@@ -16,7 +16,7 @@ Mission:
 
 Does not merge/deploy without the established authority chain.
 
-### 2. Rui-NX — Research & Content Intelligence
+### 2. Tomás — Research & Content Intelligence
 Mission:
 - continuous topic/market research;
 - identify content gaps and trends;
@@ -35,7 +35,7 @@ Mission:
 
 This is a governance role, not a substitute for legal counsel.
 
-### 4. Clara-NX — Learning Product Editor
+### 4. Elisa — Learning Product Editor
 Mission:
 - convert approved source material into products;
 - define learning outcomes, modules, lessons, exercises and assessments;
@@ -52,7 +52,7 @@ Mission:
 - preview/trailer preparation;
 - coordinate AMF requests when higher-end creative production is needed.
 
-### 6. Nora-NX — Community Lead & Moderator
+### 6. Maia — Community Lead & Moderator
 Mission:
 - Telegram, Discord and WhatsApp community operations;
 - onboarding;
@@ -76,7 +76,7 @@ Mission:
 
 Never edits payment/order truth.
 
-### 8. Iris-NX — Growth & Lifecycle Ops
+### 8. Luma — Growth & Lifecycle Ops
 Mission:
 - launch plans;
 - free previews/lead magnets;
@@ -108,7 +108,7 @@ Activated for high-risk content:
 Human professional review remains required where appropriate.
 
 ### 11. Data/Performance Analyst
-Can initially be absorbed by Nova/Íris and become dedicated at scale:
+Can initially be absorbed by Diana/Luma and become dedicated at scale:
 - content performance;
 - completion/retention;
 - conversion;
