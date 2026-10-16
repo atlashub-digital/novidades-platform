@@ -1,243 +1,112 @@
-# Novidades.store — Commerce Platform
+# Novidades.Store — Digital Content Marketplace
 
-Production foundation for **Novidades.store**, a multi-storefront discovery-commerce platform.
+**Canonical repository:** `atlashub-digital/novidades-platform`
 
-## Current launch state
+Novidades.Store is being rebaselined as a **digital-first content, learning and media marketplace**. The commercial core is eBooks, classes, webinars, complete trainings, video/audio learning, WebReader/WebPlayer experiences and curated digital bundles.
 
-- Main storefront: `novidades.store`
-- Primary market: Brazil / BRL
-- Primary payment rail: XPAYMENTS / PIX S2S
-- XPAYMENTS Store: `NOVIDADES-BRL`
-- International Store reserved: `NOVIDADES-EURO`
-- First dedicated funnel: `signum312.novidades.store`
-- Shared Commerce Core: existing AutoHub360 Supabase project
-- Supabase project ref: `eivqvrfsreaopzlvhadu`
-- Shared DB region: `sa-east-1`
-- CI: strict TypeScript + Next.js build on every push to `main`
+Physical commerce is **not a V1 priority**. It may return later as a complementary affiliate-discovery layer (for example external marketplace links), without bringing inventory, fulfillment or provider-payment complexity back into the core.
 
-## Architecture
+## Governance
 
-```text
-                    Shared Supabase Commerce Core
-                                │
-             ┌──────────────────┼──────────────────┐
-             │                  │                  │
-      novidades.store   signum312...       autohub360.store
-             │                  │                  │
-             └──────── storefront/listing layer ───┘
-                                │
-                         orders / inventory
-                                │
-                            XPAYMENTS
-                     ┌──────────┴──────────┐
-                     │                     │
-               NOVIDADES-BRL        NOVIDADES-EURO
-                  BRL / PIX              EUR / preview
-```
+- **GitHub** is the technical source of truth.
+- **Notion** is the operational/project layer.
+- **ARO** is the authority for checkout, order, payment state and entitlement.
+- **GWD / GoWorld.Digital** owns sellers, affiliates, attribution, commissions, gamification and seller/community enablement.
+- **AMF** remains a separate content/creative factory; Novidades may have its own dedicated operational agents.
 
-The canonical `products` table is shared. A product may be published differently through
-`product_listings`, `listing_prices` and `product_listing_media` for each storefront.
+## Repository consolidation
 
-A dedicated funnel is therefore a sales surface, not a duplicated product database.
+This repository is the target application for Novidades.Store.
 
-## Why reuse the AutoHub360 Supabase project?
+`atlashub-digital/novidades-digital` is now a **migration source / legacy application**. Its useful entitlement, protected-delivery and product concepts will be migrated here. It should not remain a second production application for the same customer journey.
 
-The existing project already contained production-oriented tables and RLS for:
+See:
+- `docs/NOV-001-AUDIT.md`
+- `docs/TARGET-ARCHITECTURE.md`
+- `docs/CONTENT-GOVERNANCE.md`
+- `docs/MEDIA-DELIVERY.md`
+- `docs/HERMES-WORKFORCE.md`
+- `docs/LEGACY-RETIREMENT.md`
 
-- products and variants
-- market offers
-- inventory
-- carts
-- orders and order items
-- payments
-- shipments
-- customers
-- campaigns and sessions
-- CRM / support / automation
+## Product priority
 
-The Novidades migration extends this core **additively** with:
+### P0 — Digital learning & content
+- eBooks and long-form guides;
+- classes and lesson series;
+- webinars;
+- complete courses/trainings;
+- video/audio content;
+- WebReader;
+- WebPlayer;
+- private downloads/assets;
+- bundles and curated collections;
+- community access attached to an entitlement.
 
-- `commerce_organizations`
-- `legal_entities`
-- `storefronts`
-- `storefront_domains`
-- `product_listings`
-- `listing_prices`
-- `product_listing_media`
-- storefront/seller/payment-store references on operational records
+### P1 — Free/lead content
+- excerpts and first lessons;
+- mini publications;
+- public articles;
+- selected tools/checklists;
+- previews/trailers;
+- lead magnets.
 
-AutoHub360 remains on the same database and can migrate progressively from its legacy
-store-specific catalog access to the generic storefront layer. No destructive database
-migration or data copy is required.
+### P2 — Digital asset packs
+Existing site templates, old PLR-derived assets and tools are **not automatically products**. They must pass product and rights gates. Strong assets may later become ZIP packs, freebies or paid bundles.
 
-## Applied migrations
+### P3 — Physical/affiliate discovery
+Future complementary revenue only:
+- external affiliate offers;
+- marketplace links;
+- curated recommendations.
 
-The shared Supabase project already has these Novidades extensions applied:
+No V1 inventory, shipping or physical-product checkout is required.
 
-- `20260918211728_novidades_multistorefront_core_v1`
-- `20260918213200_shared_legal_entity_normalization_v1`
-
-The SQL files are also versioned in this repository and the AutoHub360 repository.
-
-## Seeded storefronts
-
-- `NOVIDADES-BRL` — live / BRL / pt-BR
-- `NOVIDADES-EURO` — preview / EUR / en-GB
-- `SIGNUM312-BR` — live funnel using `NOVIDADES-BRL`
-- `AUTOHUB360-BR` — mapped into the shared storefront model
-
-## Seeded first product
-
-Canonical product:
-- SIGNUM 312
-
-Variants:
-- `SIGNUM312-PATINA` — R$ 99,90
-- `SIGNUM312-GOLD` — R$ 89,90
-- `SIGNUM312-DUO` — R$ 169,90
-
-The platform intentionally does not seed fake ratings, fake reviews, fake best-seller badges,
-fake stock or unsupported shipping claims.
-
-## Local development
-
-```bash
-bun install
-cp .env.example .env.local
-bun run dev
-```
-
-## Production environment
-
-Required for catalog:
+## Target customer flow
 
 ```text
-NEXT_PUBLIC_SITE_URL=https://novidades.store
-NEXT_PUBLIC_SUPABASE_URL=https://eivqvrfsreaopzlvhadu.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable key>
-COMMERCE_STOREFRONT_CODE=NOVIDADES-BRL
+Discovery / social / seller referral
+          ↓
+Novidades.Store product / course / webinar page
+          ↓
+ARO checkout
+          ↓
+ARO Order APPROVED
+          ↓
+ARO entitlement ACTIVE
+          ↓
+Novidades Library
+   ├── WebReader
+   ├── WebPlayer
+   ├── Downloads
+   └── Community access
+          ↓
+GWD receives attributed commercial event
+   └── seller/affiliate accrual + gamification
 ```
 
-Required server-side for commerce/payment:
+## Media strategy
 
-```text
-SUPABASE_SERVICE_ROLE_KEY=<server only>
+- **Cloudflare Stream** — target video delivery for protected adaptive playback.
+- **Cloudflare R2** — target object storage for PDFs, ZIPs, audio and supporting assets.
+- **Telegram** — immediate bridge/community channel where rights and access rules permit; not canonical content storage.
+- **Google Drive** — production/customer delivery is not the target.
 
-XPAYMENTS_API_URL=https://api.xpayments.digital/api/v1
-XPAYMENTS_BRL_API_KEY=<NOVIDADES-BRL live key>
-XPAYMENTS_EURO_API_KEY=<NOVIDADES-EURO key when enabled>
+## Content rule
 
-BRL_SHIPPING_CENTS=<integer cents, 0 means free shipping>
-```
+Nothing becomes sellable merely because it exists in Drive, Telegram, GitHub or the current catalog.
 
-Never expose `SUPABASE_SERVICE_ROLE_KEY` or XPAYMENTS private keys using a
-`NEXT_PUBLIC_` prefix.
+Every release must pass:
+1. source/provenance;
+2. rights/license;
+3. editorial/risk review;
+4. productization;
+5. media/delivery QA;
+6. ARO offer + entitlement mapping;
+7. preview/E2E;
+8. publication gate.
 
-## Public catalog
+## Current safety state
 
-The homepage reads the shared Commerce Core through the public RLS-protected Supabase surface.
+Direct XPAYMENTS checkout is legacy and **not the target architecture**. During this rebaseline, customer-facing direct checkout is intentionally blocked until the ARO path and access model are homologated.
 
-Endpoint:
-
-```text
-GET /api/catalog
-```
-
-Search:
-
-```text
-GET /api/search?q=...
-```
-
-A minimal safe fallback contains only SIGNUM 312 so the site can still render if the public
-catalog is temporarily unavailable.
-
-## Institutional package
-
-Live routes include:
-
-- `/sobre`
-- `/contato`
-- `/ajuda`
-- `/entregas`
-- `/pagamentos`
-- `/trocas-e-devolucoes`
-- `/cancelamentos`
-- `/termos`
-- `/privacidade`
-- `/cookies`
-- `/direitos-de-privacidade`
-- `/informacoes-legais`
-
-The site also includes first-party cookie preference handling.
-
-## Seller model
-
-Brazilian seller entity:
-
-```text
-69.093.616 MICAELA GOMES DE JESUS
-CNPJ 69.093.616/0001-50
-```
-
-International entity reserved for eligible international sales:
-
-```text
-MGJ EXPERT LTD
-Company number 17422467
-```
-
-The actual seller must be resolved per storefront/order. A shared database does **not**
-mean financial/legal sellers are mixed.
-
-## Visual / conversion rules
-
-The production UI follows these rules:
-
-- mobile-first
-- real product imagery for SIGNUM
-- no fake ratings/reviews
-- no fake scarcity
-- no unsupported shipping claims
-- product/seller/payment information before checkout
-- dedicated funnels remain conversion-first
-- main site is discovery/trust/SEO-first
-
-## CI
-
-```bash
-bun run typecheck
-bun run build
-```
-
-Both commands are required by GitHub Actions.
-
-## Before first public traffic
-
-1. Set the Vercel environment variables.
-2. Confirm `NOVIDADES-BRL` XPAYMENTS live API key.
-3. Decide and configure `BRL_SHIPPING_CENTS`.
-4. Deploy the required XPAYMENTS PIX runtime changes.
-5. Run one controlled end-to-end PIX order.
-6. Verify payment status and fulfillment metadata.
-7. Confirm support e-mail aliases are receiving mail.
-8. Connect `novidades.store` and `signum312.novidades.store`.
-9. Review real mobile/tablet/desktop rendering on the Vercel preview.
-10. Only then enable paid traffic.
-
-## Important boundary
-
-Supabase Commerce Core owns:
-- product/listing data
-- cart/order data
-- customer/fulfillment data
-- commerce attribution
-
-XPAYMENTS owns:
-- payment transaction truth
-- provider routing
-- financial ledger
-- provider fees
-- settlement
-
-Do not duplicate the XPAYMENTS financial ledger inside Supabase.
+No DNS cutover, LIVE activation or real payment is authorized by this branch.
