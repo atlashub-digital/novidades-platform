@@ -15,7 +15,7 @@ import { EBOOKS, EBOOK_CATEGORIES } from "@/lib/ebooks";
 export const metadata: Metadata = {
   title: "E-Books & Packs Digitais",
   description:
-    "Biblioteca de E-Books selecionados por tema, com títulos individuais e packs. Checkout protegido e acesso digital após confirmação do pagamento.",
+    "Biblioteca editorial de E-Books e packs em revalidação de conteúdo, direitos, checkout ARO e acesso digital.",
   alternates: { canonical: "https://novidades.store/ebooks" },
 };
 
@@ -129,10 +129,10 @@ export default function EbooksPage() {
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">
-              Disponíveis agora
+              Catálogo editorial em revalidação
             </p>
             <h2 className="mt-1 text-3xl font-black tracking-[-0.04em]">
-              Biblioteca em expansão · {live.filter((item) => item.kind === "ebook").length} títulos disponíveis
+              Biblioteca em expansão · {live.filter((item) => item.kind === "ebook").length} títulos estruturados
             </h2>
           </div>
           <p className="max-w-xl text-sm leading-6 text-slate-500">

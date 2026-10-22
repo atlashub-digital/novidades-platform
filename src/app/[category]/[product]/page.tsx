@@ -358,7 +358,7 @@ export default async function ProductPage({ params }: Props) {
   const { category, product } = await params;
   const listing = await getPublicListingBySlug(category, product);
 
-  if (!listing || listing.priceCents === null) notFound();
+  if (!listing || listing.priceCents === null || listing.fulfillmentType !== "digital") notFound();
 
   const price = listing.priceCents / 100;
   const funnelUrl = listing.funnelUrl;
@@ -366,7 +366,7 @@ export default async function ProductPage({ params }: Props) {
   const detail = isDigital ? DIGITAL_DETAILS[listing.slug] : undefined;
   const canonicalUrl =
     "https://novidades.store/" + category + "/" + product;
-  const offerActive = Boolean(funnelUrl || isDigital);
+  const offerActive = Boolean(funnelUrl);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -448,7 +448,7 @@ export default async function ProductPage({ params }: Props) {
               {listing.currency === "BRL" ? (
                 <p className="mt-2 inline-flex items-center gap-2 text-xs text-muted-foreground">
                   <Zap className="h-4 w-4 text-brand" aria-hidden="true" />
-                  PIX via XPAYMENTS no checkout da oferta
+                  Checkout comercial em migração para ARO
                 </p>
               ) : null}
               {isDigital ? (
