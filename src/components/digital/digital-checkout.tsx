@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, LoaderCircle, ShieldCheck } from "lucide-react";
+import { captureGwdAttribution, readGwdAttribution } from "@/lib/gwd-attribution";
 
 const CHECKOUT_URL =
   "https://eivqvrfsreaopzlvhadu.supabase.co/functions/v1/digital-checkout";
@@ -50,6 +51,11 @@ export function DigitalCheckout({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  // GWD affiliate links land here with gwd_ref + utm_*: keep them until the checkout request.
+  useEffect(() => {
+    captureGwdAttribution();
+  }, []);
+
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError("");
@@ -65,7 +71,11 @@ export function DigitalCheckout({
       const response = await fetch(CHECKOUT_URL, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ productSlug, email: normalized }),
+        body: JSON.stringify({
+          productSlug,
+          email: normalized,
+          attribution: readGwdAttribution() ?? undefined,
+        }),
       });
       const data = await response.json();
 
